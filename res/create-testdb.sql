@@ -1,0 +1,13 @@
+
+DROP DATABASE IF EXISTS testdb;
+CREATE DATABASE testdb;
+
+USE testdb;
+
+DROP TABLE IF EXISTS thanks;
+CREATE TABLE thanks (
+  id VARCHAR(23) NOT NULL PRIMARY KEY,
+  fromUserId VARCHAR(16),
+  toUserId VARCHAR(16) NOT NULL,
+  reason TEXT
+);

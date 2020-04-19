@@ -1,5 +1,29 @@
 # Nest.js + TypeORM + Typescript + MySQL
 
+### Build Commands
+
+``` bash
+# install dependencies
+npm install
+
+# create test database
+mysql -u root -p < .res/create-testdb.sql
+
+# create test user or you could change ormconfig for fix connection
+mysql -u root -p < .res/create-testuser.sql
+
+# load test data if need
+mysql -u root -p < .res/load-test-data.sql
+
+# run test
+npm run test:e2e
+
+# run lint
+npm run lint
+
+# start project
+npm start
+```
 
 ### Requrements
 
