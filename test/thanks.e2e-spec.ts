@@ -127,6 +127,8 @@ describe('ThanksModule', () => {
 
       expect(body.total).toBe(3);
       expect(body.items.length).toBe(2);
+      expect(body.items[0].id).toBe('test-user#000002');
+      expect(body.items[1].id).toBe('test-user#000001');
       expect(body.nextCursor).not.toBeNull();
     });
 
@@ -141,6 +143,7 @@ describe('ThanksModule', () => {
 
       expect(body.total).toBe(3);
       expect(body.items.length).toBe(1);
+      expect(body.items[0].id).toBe('test-user#000000');
       expect(body.nextCursor).toBeNull();
     })
   });

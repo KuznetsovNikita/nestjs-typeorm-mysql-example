@@ -14,30 +14,28 @@ export class ThanksService {
   
   async list(toUserId: string, perPage: string, page = 0): Promise<ListResponce> {
     const perPageInt = parseInt(perPage);
-    const list = await this.thanksRepository.find({ toUserId });
+    const total = await this.thanksRepository.count({ toUserId });
 
-    const [items, nextCursor] = ThanksService.getPage(page, perPageInt, toUserId, list);
+    const items = await this.thanksRepository
+      .createQueryBuilder()
+      .where("thanks.toUserId = :toUserId", { toUserId })
+      .orderBy("thanks.id", "DESC")
+      .skip(perPageInt * page)
+      .take(perPageInt)
+      .getMany();
+
+    const first = await this.thanksRepository.findOne({ toUserId });
+
+    let nextCursor: string | null = null
+    if (items.length < total && items[0].id !== first.id) {
+      nextCursor = ThanksService.createCursor(toUserId, page + 1, perPageInt)
+    }
   
     return {
-      total: list.length,
+      total,
       nextCursor,
       items,
     }
-  }
-
-  private static getPage(
-    page: number,
-    perPage: number,
-    toUserId: string,
-    list: Thanks[],
-  ): [Thanks[], string | null] {
-    const nextPage = page + 1;
-    const result = list.filter((_, index) => index >= page * perPage && index < nextPage * perPage);
-
-    if (result[result.length - 1] == list[list.length -1 ]) {
-      return [result, null]
-    }
-    return [result, this.createCursor(toUserId, nextPage, perPage)];
   }
 
   private static createCursor(
@@ -62,8 +60,10 @@ export class ThanksService {
 
   tryAdd(body: AddBody, tryIndex = 0): Promise<Thanks> {
     return this.add(body)
-      .catch(error => {
+      .catch(async error => {
         if (tryIndex > 3) throw error;
+
+        await ThanksService.delay(100);
         return this.tryAdd(body, tryIndex + 1)
       });
   }
@@ -78,6 +78,10 @@ export class ThanksService {
     thanks.reason = body.reason;
 
     return this.thanksRepository.save(thanks);
+  }
+
+  private static delay(milliceconds: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, milliceconds));
   }
 
   private static generatePrimeryKey(count: number, id: string): string {
