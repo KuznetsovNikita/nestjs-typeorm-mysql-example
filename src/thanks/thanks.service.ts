@@ -12,21 +12,29 @@ export class ThanksService {
     private thanksRepository: Repository<Thanks>,
   ) {}
   
-  async list(toUserId: string, perPage = 20, page = 0): Promise<ListResponse> {
+  async list(toUserId: string, perPage = '20', cursorId = ''): Promise<ListResponse> {
+    const perPageInt = parseInt(perPage);
 
-    const [items, total] = await this.thanksRepository
+    const builder = this.thanksRepository
       .createQueryBuilder()
-      .where("thanks.id LIKE :id", { id: `${toUserId}#%` })
-      .orderBy("thanks.id", "DESC")
-      .skip(perPage * page)
-      .take(perPage)
-      .getManyAndCount();
+      .where('id LIKE :id', { id: `${toUserId}#%` });
+    
+    const total = await builder.getCount();
+
+    if (cursorId) {
+      builder.andWhere(':cursorId > id ', { cursorId })
+    }
+
+    const items = await builder
+      .orderBy('id', 'DESC')
+      .take(perPageInt)
+      .getMany();
 
     const first = await this.thanksRepository.findOne({ toUserId });
 
     let nextCursor: string | null = null
     if (items.length < total && items[0].id !== first.id) {
-      nextCursor = ThanksService.createCursor(toUserId, page + 1, perPage)
+      nextCursor = ThanksService.createCursor(items[items.length - 1].id, perPageInt);
     }
   
     return {
@@ -37,23 +45,23 @@ export class ThanksService {
   }
 
   private static createCursor(
-    toUserId: string, 
-    page: number,
+    id: string, 
     perPage: number
   ): string {
-    return  encodeURIComponent(new Buffer(`${toUserId}_${page}_${perPage}`).toString('base64'));
+    return  encodeURIComponent(new Buffer(`${id}_${perPage}`).toString('base64'));
   }
 
   private static parseCursor(
     cursor: string,
-  ): [string, number, number] {
-    const [toUserId, page, perPage] = new Buffer(decodeURIComponent(cursor), 'base64').toString('ascii').split('_');
-    return [toUserId, parseInt(page), parseInt(perPage)];
+  ): [string, string] {
+    const [id, perPage] = new Buffer(decodeURIComponent(cursor), 'base64').toString('ascii').split('_');
+    return [id, perPage];
   }
 
   listByCursor(cursor: string): Promise<ListResponse>  {
-    const [toUserId, page, perPage] = ThanksService.parseCursor(cursor);
-    return this.list(toUserId, perPage, page);
+    const [id, perPage] = ThanksService.parseCursor(cursor);
+    const [toUserId] = id.split('#');
+    return this.list(toUserId, perPage, id);
   }
 
   tryAdd(body: AddBody, tryIndex = 0): Promise<Thanks> {

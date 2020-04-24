@@ -20,7 +20,7 @@ export class ListQuery {
   id: string;
 
   @IsNumberString()
-  perPage: number;
+  perPage: string;
 
   @IsString()
   cursor: string;
