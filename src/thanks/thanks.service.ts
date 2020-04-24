@@ -13,15 +13,14 @@ export class ThanksService {
   ) {}
   
   async list(toUserId: string, perPage = 20, page = 0): Promise<ListResponse> {
-    const total = await this.thanksRepository.count({ toUserId });
 
-    const items = await this.thanksRepository
+    const [items, total] = await this.thanksRepository
       .createQueryBuilder()
       .where("thanks.id LIKE :id", { id: `${toUserId}#%` })
       .orderBy("thanks.id", "DESC")
       .skip(perPage * page)
       .take(perPage)
-      .getMany();
+      .getManyAndCount();
 
     const first = await this.thanksRepository.findOne({ toUserId });
 
