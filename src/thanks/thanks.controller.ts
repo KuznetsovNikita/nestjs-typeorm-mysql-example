@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Post, Query } from '@nestjs/common';
-import { AddBody, ListQuery, ListResponce } from './models';
+import { AddBody, ListQuery, ListResponse } from './models';
 import { Thanks } from './thanks.entity';
 import { ThanksService } from './thanks.service';
 
@@ -15,7 +15,7 @@ export class ThanksController {
   }
 
   @Get('list')
-  list(@Query() query: ListQuery): Promise<ListResponce> {
+  list(@Query() query: ListQuery): Promise<ListResponse> {
     if (!query) {
       throw new HttpException('missing information', HttpStatus.BAD_REQUEST);
     }

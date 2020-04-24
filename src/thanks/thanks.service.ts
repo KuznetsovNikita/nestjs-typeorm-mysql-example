@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AddBody, ListResponce } from './models';
+import { AddBody, ListResponse } from './models';
 import { Thanks } from './thanks.entity';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class ThanksService {
     private thanksRepository: Repository<Thanks>,
   ) {}
   
-  async list(toUserId: string, perPage: string, page = 0): Promise<ListResponce> {
+  async list(toUserId: string, perPage: string, page = 0): Promise<ListResponse> {
     const perPageInt = parseInt(perPage);
     const total = await this.thanksRepository.count({ toUserId });
 
@@ -53,7 +53,7 @@ export class ThanksService {
     return [toUserId, parseInt(page), perPage];
   }
 
-  listByCursor(cursor: string): Promise<ListResponce>  {
+  listByCursor(cursor: string): Promise<ListResponse>  {
     const [toUserId, page, perPage] = ThanksService.parseCursor(cursor);
     return this.list(toUserId, perPage, page);
   }
@@ -72,20 +72,26 @@ export class ThanksService {
     const count = await this.thanksRepository.count({ toUserId: body.to });
 
     const thanks = new Thanks();
-    thanks.id = ThanksService.generatePrimeryKey(count, body.to);
+    thanks.id = ThanksService.generatePrimaryKey(count, body.to);
     thanks.fromUserId = body.from;
     thanks.toUserId = body.to;
     thanks.reason = body.reason;
 
-    return this.thanksRepository.save(thanks);
+    await this.thanksRepository
+      .createQueryBuilder()
+      .insert()
+      .values([ thanks ])
+      .execute();
+
+    return thanks;
   }
 
-  private static delay(milliceconds: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, milliceconds));
+  private static delay(milliseconds: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
   }
 
-  private static generatePrimeryKey(count: number, id: string): string {
-    return `${id}#${('00000' + count.toString()).slice(-6)}`;
+  private static generatePrimaryKey(count: number, id: string): string {
+    return `${id}#${count.toString().padEnd(6, '0')}`;
   }
 
 }

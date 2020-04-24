@@ -13,7 +13,7 @@ export interface ListQuery {
   cursor: string;
 }
 
-export interface ListResponce {
+export interface ListResponse {
   total: number;
   nextCursor: string | null;
   items: Thanks[];
