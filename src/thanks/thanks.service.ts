@@ -77,13 +77,12 @@ export class ThanksService {
     thanks.toUserId = body.to;
     thanks.reason = body.reason;
 
-    await this.thanksRepository
+    return this.thanksRepository
       .createQueryBuilder()
       .insert()
       .values([ thanks ])
-      .execute();
-
-    return thanks;
+      .execute()
+      .then(() => thanks);
   }
 
   private static delay(milliseconds: number): Promise<void> {
