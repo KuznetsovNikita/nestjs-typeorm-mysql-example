@@ -1,15 +1,28 @@
+import { IsNotEmpty, IsNumberString, IsString } from 'class-validator';
 import { Thanks } from "./thanks.entity";
 
-
-export interface AddBody {
+export class AddBody {
+  @IsString()
   from: string | null;
+
+  @IsString()
+  @IsNotEmpty()
   to: string;
+
+  @IsString()
+  @IsNotEmpty()
   reason: string;
 }
 
-export interface ListQuery {
+export class ListQuery {
+  @IsString()
+  @IsNotEmpty()
   id: string;
-  perPage: string;
+
+  @IsNumberString()
+  perPage: number;
+
+  @IsString()
   cursor: string;
 }
 

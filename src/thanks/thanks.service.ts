@@ -12,23 +12,22 @@ export class ThanksService {
     private thanksRepository: Repository<Thanks>,
   ) {}
   
-  async list(toUserId: string, perPage: string, page = 0): Promise<ListResponse> {
-    const perPageInt = parseInt(perPage);
+  async list(toUserId: string, perPage = 20, page = 0): Promise<ListResponse> {
     const total = await this.thanksRepository.count({ toUserId });
 
     const items = await this.thanksRepository
       .createQueryBuilder()
       .where("thanks.toUserId = :toUserId", { toUserId })
       .orderBy("thanks.id", "DESC")
-      .skip(perPageInt * page)
-      .take(perPageInt)
+      .skip(perPage * page)
+      .take(perPage)
       .getMany();
 
     const first = await this.thanksRepository.findOne({ toUserId });
 
     let nextCursor: string | null = null
     if (items.length < total && items[0].id !== first.id) {
-      nextCursor = ThanksService.createCursor(toUserId, page + 1, perPageInt)
+      nextCursor = ThanksService.createCursor(toUserId, page + 1, perPage)
     }
   
     return {
@@ -48,9 +47,9 @@ export class ThanksService {
 
   private static parseCursor(
     cursor: string,
-  ): [string, number, string] {
+  ): [string, number, number] {
     const [toUserId, page, perPage] = new Buffer(decodeURIComponent(cursor), 'base64').toString('ascii').split('_');
-    return [toUserId, parseInt(page), perPage];
+    return [toUserId, parseInt(page), parseInt(perPage)];
   }
 
   listByCursor(cursor: string): Promise<ListResponse>  {
