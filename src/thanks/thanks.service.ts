@@ -17,7 +17,7 @@ export class ThanksService {
 
     const items = await this.thanksRepository
       .createQueryBuilder()
-      .where("thanks.toUserId = :toUserId", { toUserId })
+      .where("thanks.id LIKE :id", { id: `${toUserId}#%` })
       .orderBy("thanks.id", "DESC")
       .skip(perPage * page)
       .take(perPage)
@@ -89,7 +89,7 @@ export class ThanksService {
   }
 
   private static generatePrimaryKey(count: number, id: string): string {
-    return `${id}#${count.toString().padEnd(6, '0')}`;
+    return `${id}#${count.toString().padStart(6, '0')}`;
   }
 
 }

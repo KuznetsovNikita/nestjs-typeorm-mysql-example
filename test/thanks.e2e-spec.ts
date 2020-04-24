@@ -103,13 +103,6 @@ describe('ThanksModule', () => {
       await app.close();
       await repository.query('DELETE FROM thanks WHERE toUserId = "test-user";');
     });
-  
-  
-    it('Should return a bad request if query is empty', async () => {
-      await supertest(app.getHttpServer())
-        .get('/list')
-        .expect(400);
-    });
     
     it('Should return thanks by id', async () => {
       const { body } = await supertest(app.getHttpServer())
