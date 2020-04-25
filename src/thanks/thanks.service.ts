@@ -33,7 +33,7 @@ export class ThanksService {
     const first = await this.thanksRepository.findOne({ toUserId });
 
     let nextCursor: string | null = null
-    if (items.length < total && items[0].id !== first.id) {
+    if (items.length < total && items[items.length -1].id !== first.id) {
       nextCursor = ThanksService.createCursor(items[items.length - 1].id, perPageInt);
     }
   
