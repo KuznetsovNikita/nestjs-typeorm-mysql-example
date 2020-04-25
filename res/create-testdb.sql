@@ -2,12 +2,8 @@
 DROP DATABASE IF EXISTS testdb;
 CREATE DATABASE testdb;
 
-USE testdb;
-
-DROP TABLE IF EXISTS thanks;
-CREATE TABLE thanks (
-  id VARCHAR(23) NOT NULL PRIMARY KEY,
-  fromUserId VARCHAR(16),
-  toUserId VARCHAR(16) NOT NULL,
-  reason TEXT
-);
+DROP USER IF EXISTS 'testuser'@'localhost';
+CREATE USER 'testuser'@'localhost' IDENTIFIED BY 'testpassword';
+GRANT ALL PRIVILEGES on testdb.* to 'testuser'@'localhost';
+ALTER USER 'testuser'@'localhost' IDENTIFIED WITH mysql_native_password BY 'testpassword';
+FLUSH PRIVILEGES;

@@ -6,14 +6,11 @@
 # install dependencies
 npm install
 
-# create test database
+# create test database and test user
 mysql -u root -p < ./res/create-testdb.sql
 
-# create test user or you could change ormconfig for fix connection
-mysql -u root -p < ./res/create-testuser.sql
-
-# load test data if need
-mysql -u root -p < ./res/load-test-data.sql
+# run migrations
+npm run migration:run
 
 # run test
 npm run test:e2e
