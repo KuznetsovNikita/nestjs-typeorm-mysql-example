@@ -6,7 +6,7 @@
 # install dependencies
 npm install
 
-# create test database and test user
+# create test database and test user or you could change ormconfig for fix connection
 mysql -u root -p < ./res/create-testdb.sql
 
 # run migrations

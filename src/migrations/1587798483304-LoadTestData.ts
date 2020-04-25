@@ -8,14 +8,14 @@ export class LoadTestData1587798483304 implements MigrationInterface {
         for(let reason = 0; reason <= 15; reason++) {
           const toUserId = `user-id-${user}`;
           const id = `${toUserId}#${reason.toString().padStart(6, '0')}`;
-          await queryRunner.query(`INSERT INTO testdb.thanks VALUES('${id}', null, '${toUserId}', CONCAT('reason-', ${reason}))`);
+          await queryRunner.query(`INSERT INTO thanks VALUES('${id}', null, '${toUserId}', CONCAT('reason-', ${reason}))`);
           ;
         }
       }
     }
 
     public async down(queryRunner: QueryRunner): Promise<any> {
-      await queryRunner.query(`DELETE FROM testdb.thanks`);
+      await queryRunner.query(`DELETE FROM thanks`);
     }
 
 }
