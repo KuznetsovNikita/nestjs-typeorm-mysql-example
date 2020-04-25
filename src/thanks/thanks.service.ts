@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { getManager, Repository } from 'typeorm';
 import { AddBody, ListResponse } from './models';
 import { Thanks } from './thanks.entity';
 
@@ -75,20 +75,26 @@ export class ThanksService {
   }
 
   private async add(body: AddBody): Promise<Thanks> {
-    const count = await this.thanksRepository.count({ toUserId: body.to });
 
-    const thanks = new Thanks();
-    thanks.id = ThanksService.generatePrimaryKey(count, body.to);
-    thanks.fromUserId = body.from;
-    thanks.toUserId = body.to;
-    thanks.reason = body.reason;
+    return getManager()
+      .transaction(async entityManager =>  {
+        const count = await entityManager
+          .getRepository(Thanks)
+          .createQueryBuilder()
+          .setLock('pessimistic_write')
+          .where('id LIKE :id', { id: `${body.to}#%` })
+          .getCount();
 
-    return this.thanksRepository
-      .createQueryBuilder()
-      .insert()
-      .values([ thanks ])
-      .execute()
-      .then(() => thanks);
+        const thanks = new Thanks();
+        thanks.id = ThanksService.generatePrimaryKey(count, body.to);
+        thanks.fromUserId = body.from;
+        thanks.toUserId = body.to;
+        thanks.reason = body.reason;
+        
+        return entityManager
+          .getRepository(Thanks)
+          .save(thanks);
+      });
   }
 
   private static delay(milliseconds: number): Promise<void> {
