@@ -56,20 +56,18 @@ describe('ThanksModule', () => {
       expect(body.reason).toBe('some-reason');
     });
   
-    it('Should add 2 thanks at the same time', async () => {
-      await Promise.all([
-        supertest.agent(app.getHttpServer())
+    it('Should add 5 thanks at the same time', async () => {
+      const result = await Promise.all([1, 2, 3, 4, 5]
+        .map(index => supertest.agent(app.getHttpServer())
           .post('/add')
-          .send({ from: null, to: 'test-user', reason: 'some-reason-1'})
-          .expect(201),
-        supertest.agent(app.getHttpServer())
-          .post('/add')
-          .send({ from: null, to: 'test-user', reason: 'some-reason-2'})
+          .send({ from: null, to: 'test-user', reason: 'some-reason-' + index})
           .expect(201)
-      ]);
+        )
+      );
+      console.log(result.map(item => item.body));
       
       const count = await repository.count({ toUserId: 'test-user'});
-      expect(count).toBe(2);
+      expect(count).toBe(5);
     });
   });
 
